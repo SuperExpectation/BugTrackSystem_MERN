@@ -7,48 +7,35 @@ import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import RaisedButton from 'material-ui/RaisedButton';
 import { browserHistory } from 'react-router';
-import Pager from 'react-pager' ;
+
 
 export default class BugList extends React.Component {  
   constructor(props) {
         super(props); 
-        this.state = { bugs: [],
-                       allbugs:[],
-                       indexPage: 0, numberPage: 5,                      
-                     };     
+        
+  }
+
+  componentWillReceiveProps (){
+    this.setState({allbugs: this.props.data});
   }
 
   componentWillMount (){
-    $.ajax('/api/bugs').done(function(data) {
-      this.setState({bugs: data});
-      this.setState({allbugs: data});
-    }.bind(this));
-    // In production, we'd also handle errors.
+    this.setState({allbugs: this.props.data});
   }
 
-  doFilter(filterValue) {
-    console.info("BugList: "+filterValue);
-    if(filterValue =='All'){
-      this.setState({bugs: this.state.allbugs});
-      return;
-    }
-    function matchStatus(element, index, array) {
-      return (element.status == filterValue);
-    }
-    var filtered = this.state.allbugs.filter(matchStatus);
-    this.setState({bugs: filtered});
-  }
-
-  doPager(pageset,number){    
+  doSearch(type,txt){        
+    this.props.search(type, txt);
     //this.state.bugsFilter.slice(this.state.number*pageset,this.state.number*(pageset+1))
     //this.setState({bugs: this.state.bugs.slice(number*pageset,number*(pageset+1))});
   }
 
-  handlePaginatorChange(pageset) {                     
-    
-    //this.setState({bugsFilter: this.state.bugsFilter.slice(this.state.number*pageset,this.state.number*(pageset+1))});   
+  doRemove(){
+    this.props.cleanFilter();    
   }
 
+  mulSearch(priority,status,owner){
+    this.props.mulSearch(priority,status,owner);
+  }
   handleAddBtn() {
     const path = '/bugAdd';
     browserHistory.push(path);
@@ -60,12 +47,13 @@ export default class BugList extends React.Component {
       width:'100%',
       
     };
+    
     return (
       <div className="main_content" style={divStyle}>                   
-        <BugFilter onChange={this.doFilter.bind(this)} />
+        <BugFilter  search={this.doSearch.bind(this)} rmFilter={this.doRemove.bind(this)} mulSearch={this.mulSearch.bind(this)}/>
         
-        <BugTable bugs={this.state.bugs}/>
-            
+        <BugTable bugs={this.props.data}/>
+           
       </div>
     )
   }

@@ -9,13 +9,15 @@ import MenuItem from 'material-ui/MenuItem';
 import Avatar from 'material-ui/Avatar';
 import FontIcon from 'material-ui/FontIcon';
 import RaisedButton from 'material-ui/RaisedButton'; 
-import {Card, CardHeader, CardText} from 'material-ui/Card';
+import {Card, CardHeader,CardActions, CardText} from 'material-ui/Card';
 import Colors from 'material-ui/styles/colors'; 
 import Paper from 'material-ui/Paper';
 import {Table,TableBody,TableHeader,TableHeaderColumn,TableRow,TableRowColumn} from 'material-ui/Table';
 import TextField from 'material-ui/TextField';
 import {Step,Stepper,StepLabel} from 'material-ui/Stepper';
-
+import Popover from 'material-ui/Popover';
+import Menu from 'material-ui/Menu';
+import FlatButton from 'material-ui/FlatButton';
 
 export default class BugInputTable extends React.Component {  
   constructor(props) {
@@ -31,7 +33,8 @@ export default class BugInputTable extends React.Component {
                         historyTmp : [],
                         commentTmp : [], 
                         user:this.props.loginUser,
-                        statusNew:'',                        
+                        statusNew:'', 
+                        open: false,                       
                      };       
   }
 
@@ -67,15 +70,15 @@ export default class BugInputTable extends React.Component {
     var submitter = this.state.submitterTmp;  
     var version = this.state.versionTmp; 
     
-    var comment = this.refs.commentValue.value.trim(); 
+    var comment = this.state.commentTmp; 
     
     
-    console.info("title:"+ title + ", feature"+feature+" ,priority:"+ priority + ", status:"+status+" ,owner:"+ owner + ", submitter:"+submitter+" ,version:"+ version + ",  comment:"+comment);
+    //console.info("title:"+ title + ", feature"+feature+" ,priority:"+ priority + ", status:"+status+" ,owner:"+ owner + ", submitter:"+submitter+" ,version:"+ version + ",  comment:"+comment);
   	if(title && feature && priority && feature && status && owner && version && comment.length!=0){  
-      console.info("old status:" + this.state.statusTmp);
-      console.info("new status:" + status);
+      //console.info("old status:" + this.state.statusTmp);
+      //console.info("new status:" + status);
       if(status != this.state.statusTmp || !this.state.statusTmp){
-        console.info("no equal");
+        //console.info("no equal");
         histroyArr.push({historyUser:this.state.user, historyStatus:status});
       }    
       
@@ -124,6 +127,23 @@ export default class BugInputTable extends React.Component {
   historyChange(e){
     this.setState({historyTmp: e.currentTarget.value});
   }
+
+  handleTouchTap(event) {
+    // This prevents ghost click.
+    event.preventDefault();
+
+    this.setState({
+      open: true,
+      anchorEl: event.currentTarget,
+    });
+  };
+
+  handleRequestClose(){
+    this.setState({
+      open: false,
+    });
+  };
+
   render() {
     var mstatus = []; 
     //var titleTmp, featureTmp,statusTmp,priorityTmp,ownerTmp,submitterTmp,historyTmp,commentTmp;  	
@@ -137,6 +157,11 @@ export default class BugInputTable extends React.Component {
       width:'100%',
       
     };   
+    var commonStyle = {
+      width:'70%',
+      margin:'0 auto 0 auto',
+      
+    };
     return (
       
       <div className="bugInputTable"> 
@@ -149,9 +174,30 @@ export default class BugInputTable extends React.Component {
                 <FontIcon className="fa fa-user-o"></FontIcon>
               }>
               </Avatar>
-            }
+            }             
           />
+          <CardActions>
+            
+            <RaisedButton
+              onTouchTap={this.handleTouchTap.bind(this)}
+              label="Action"
+            />
+            <Popover
+              open={this.state.open}
+              anchorEl={this.state.anchorEl}
+              anchorOrigin={{horizontal: 'left', vertical: 'bottom'}}
+              targetOrigin={{horizontal: 'left', vertical: 'top'}}
+              onRequestClose={this.handleRequestClose.bind(this)}
+            >
+              <Menu>
+                <MenuItem  primaryText="Add Picture" leftIcon={<FontIcon className="fa fa-picture-o"></FontIcon>} />
+                <MenuItem  primaryText="Back to Home" leftIcon={<FontIcon className="fa fa-arrow-circle-left"></FontIcon>} onTouchTap={this.handleHome.bind(this)} />
+              </Menu>
+            </Popover>    
+          </CardActions>
           <Paper zDepth={1} style={{marginTop: 10, marginBottom: 10, width:'100%'}}>
+                                 
+                  <div style={commonStyle}>
                   <TextField floatingLabelText="*Title" fullWidth={true} value={ (this.state.titleTmp !==' ' ) && this.state.titleTmp || ''} onChange={this.titleChange.bind(this)}/>                  
                 
                   <TextField style={{width: '25%'}}  floatingLabelText="*Feature"   value={ (this.state.featureTmp !==' ' ) && this.state.featureTmp || ''} onChange={this.featureChange.bind(this)}/>
@@ -166,18 +212,29 @@ export default class BugInputTable extends React.Component {
                       onChange={this.handleStatusChange.bind(this)}
                     >                                        
                       {mstatus}
-                    </SelectField>  
-                 
+                    </SelectField> 
+                  <hr/>   
+                  </div> 
+                  <div style={{width: '60%',margin:'0 auto 0 auto',}}>
                   <HistoryBar historyData={  (!this.state.historyTmp ) && [{historyUser:this.state.user,historyStatus:'New',}] || this.state.historyTmp} loginUser={this.state.user}/>
+                  
+                  </div>
+                  
+                  <div style={commonStyle}>
                   <hr/>
                   <label >*Comment:</label><br/>
-                  <textarea ref="commentValue" value={this.state.commentTmp} onChange={this.commentChange.bind(this)}></textarea>
+                  <TextField style={{width: '90%'}} hintText="Please input some detail about this bug" value={ (this.state.commentTmp.length != 0 ) && this.state.commentTmp.toString() || '' }
+                  onChange={this.commentChange.bind(this)}  
+                  multiLine={true}
+                  rows={4}
+                  rowsMax={8}/>
+                  </div>
+                  
                 
           </Paper>
           
-        <div className="control_panel"> 
-          <RaisedButton className="bugAdd_saveBtn" label="Save" onClick={this.handleAddSave.bind(this)}/>   
-          <RaisedButton className="bugDetail_homeBtn" label="Back to Home" onClick={this.handleHome.bind(this)}/>                  
+        <div style={{float:'right'}}> 
+          <RaisedButton className="bugAdd_saveBtn" label="Save" onClick={this.handleAddSave.bind(this)} />             
         </div>
         </Card>
 	      </MuiThemeProvider>

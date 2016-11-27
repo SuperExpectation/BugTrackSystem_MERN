@@ -10,6 +10,9 @@ var compiler = webpack(config);
 var BugsModel = require('./src/models').Bugs;
 var BugStatusModel = require('./src/models').BugStatus;
 var StatusModel = require('./src/models').Status;
+var BugIdModel = require('./src/models').BugId;
+var CommentModel = require('./src/models').Comment;
+var assert = require('assert')
 //var routes = require('./routes');
 
 
@@ -28,8 +31,33 @@ app.use(require('webpack-dev-middleware')(compiler, {
 
 app.use(bodyParser.json());
 app.post('/api/bugAdd/',function(req,res){
-  console.log("Req body:", req.body);
-  var newBug = new BugsModel({
+  //console.log("Req body:", req.body);  
+   
+  function incrementCounter(schemaName, callback){
+    BugIdModel.findAndModify({ _id: schemaName }, [], 
+      { $inc: { count: 1 } }, {"new":true, upsert:true}, function (err, result) {
+        if (err)
+          callback(err);
+        else
+          callback(null, result.count);
+    });
+  }
+  var idTmp = incrementCounter("bugIdSchema",function(err, docs) {  
+    if (err) { 
+      console.error('Counter on save error: ' + err);       
+    }    
+  })
+  
+  /*
+  var query = BugIdModel.findOne({_id: "bugIdSchema"});
+  //var promise = query.exec();
+  //assert.ok(promise instanceof require('mpromise'));
+  assert.ok(!(query instanceof require('mpromise')));
+  query.then(function (doc) {
+    // use doc
+    console.info("find:"+ doc.count)  
+    var newBug = new BugsModel({    
+            id:doc.count,        
             title: req.body.title,
             priority: req.body.priority,
             status: req.body.status,
@@ -41,11 +69,52 @@ app.post('/api/bugAdd/',function(req,res){
             comment: req.body.comment,
             history: req.body.history,            
           });
-  newBug.save(function(err, addedBug) {
-    if (err) { throw err; }    
-    console.log('Successfully inserted bug: ' + addedBug._id);
-    res.json(addedBug);    
+    var promise = newBug.save();
+    assert.ok(promise instanceof require('mpromise'));
+
+    promise.then(function (doc) {
+      assert.equal(doc.title, req.body.title);
+      res.json(addedBug); 
+    });    
+  */  
+  
+ 
+  BugIdModel.findOne({_id: "bugIdSchema"}, function(err, id) {
+    if (err) { 
+     console.log('Failed to inserted bug: ' + err);
+     // throw err; 
+    }
+    console.info("find:"+ id.count)  
+    var newBug = new BugsModel({    
+            id:id.count,        
+            title: req.body.title,
+            priority: req.body.priority,
+            status: req.body.status,
+            owner: req.body.owner,
+            submitter: req.body.submitter,
+            feature: req.body.feature,
+            timestamp: req.body.timestamp,
+            version: req.body.version,                
+            history: req.body.history,            
+          });
+    newBug.save(function(err, addedBug) {
+      if (err) { throw err; }    
+      console.log('Successfully inserted bug: ' + addedBug.id);
+      var newComment = new CommentModel({
+        text:req.body.comment,
+        bugId:addedBug._id,
+      });
+      newComment.save(function(err, addedComment) {
+          if (err) {         
+            console.log('Failed to inserted comment: ' + err);
+          }    
+          console.log('Successfully inserted comment: ' + addedComment.id);
+          res.json(addedBug);            
+        }); 
+        
+    }); 
   });  
+   
 });
 
 

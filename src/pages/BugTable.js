@@ -18,7 +18,7 @@ export default class BugTable extends React.Component {
   
 
   render() {
-    console.log("Rendering bug table, num items:", this.props.bugs.length);
+    //console.log("Rendering bug table, num items:", this.props.bugs.length);
     
       
     
@@ -63,7 +63,7 @@ var BugRow = React.createClass({
     return (
       <TableRow>
         <TableRowColumn style={this.getStyle(240, bug)}>
-          <Link to={'/bug/' + bug._id}>{bug._id}</Link>
+          <Link to={'/bug/' + bug._id}>{bug.id}</Link>
         </TableRowColumn>
         <TableRowColumn style={this.getStyle(120, bug)}>{bug.status}</TableRowColumn>
         <TableRowColumn style={this.getStyle(80, bug)}>{bug.priority}</TableRowColumn>
