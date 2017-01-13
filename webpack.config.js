@@ -3,19 +3,27 @@ var webpack = require('webpack');
  
 module.exports = {
   entry: [
+    'webpack/hot/dev-server',
+    'webpack-hot-middleware/client',
     './src/app'
   ],
   devtool: 'cheap-module-eval-source-map',
   output: {
-    path: __dirname,
-    filename: 'app.js',
-    publicPath: '/js/'
+    path: '/',
+    filename: 'bundle.js',
+    publicPath: '/static/' 
   },
+  plugins: [
+    new webpack.optimize.OccurenceOrderPlugin(),    
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NoErrorsPlugin(),
+  ],
   module: {
     loaders: [{
     test: /\.js$/,
-    loaders: ['babel'],
-    include: path.join(__dirname, 'src')
+    loaders: ['react-hot','babel'],
+    include: __dirname,
+    exclude: /node_modules/,
     },
     {
     test: /\.css$/,
@@ -26,9 +34,10 @@ module.exports = {
     loader: 'url-loader?limit=10000&mimetype=application/font-woff'
   },
   {
-    test: /\.(ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+    test: /\.(ttf|eot|svg|png|jpg|gif|jpeg|bmp)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
     loader: 'file-loader'
-  }
+  },
+  
     ]
   }
 };

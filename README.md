@@ -1,5 +1,5 @@
 # BugTrackSystem_MERN<br />
-Using react, express, nodejs, mongodb, matieral-ui<br />
+Using react, redux, express, nodejs, mongodb, react-bootstrap<br />
 <br /><br />
 How to run this Demo<br />
 1:Install mongodb, make sure it's runing<br />
@@ -7,7 +7,6 @@ How to run this Demo<br />
 <br />
 2:Insert following data into the DB<br />
 db.bugstatus.insert([<br />
-  {status:'Open'},<br />
   {status:'Verified'},<br />
   {status:'Closed'},<br />
   {status:'Resolved'},<br />
@@ -25,4 +24,4 @@ node server
 <br />
 <br />
 <br />
-4:Visit localhost:3000<br />
+4:Visit localhost:3030<br />

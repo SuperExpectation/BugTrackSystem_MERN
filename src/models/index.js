@@ -4,4 +4,5 @@ module.exports = {
  'BugStatus': require('./BugStatus'),
  'Status': require('./Status'),
  'Comment': require('./Comment'),
+ 'CommentImage': require('./CommentImage'),
 };

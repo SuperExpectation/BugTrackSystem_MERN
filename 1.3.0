@@ -1,0 +1,6 @@
+Study@1.0.0 D:\njs\Redux\BugSystem
+`-- webpack@1.14.0 
+  `-- node-libs-browser@0.7.0
+    `-- stream-http@2.6.0 
+      `-- builtin-status-codes@3.0.0 
+
